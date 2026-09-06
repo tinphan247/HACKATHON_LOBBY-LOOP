@@ -1,0 +1,16 @@
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+// host: true binds Vite to 0.0.0.0 so a phone on the same Wi-Fi
+// can reach this machine's local IP (not just localhost).
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    host: true,
+    port: 5173,
+  },
+  preview: {
+    host: true,
+    port: 4173,
+  },
+});
