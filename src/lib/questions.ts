@@ -16,7 +16,7 @@ export const CSAT_QUESTION =
 
 // ---------- BRANCH 1: HAPPY (rating >= 4) ----------
 export const HAPPY_QUESTION = "Điều gì khiến bạn hài lòng nhất hôm nay?";
-export const HAPPY_MAX_SELECT = 2;
+export const HAPPY_MAX_SELECT = 1;
 
 export const HAPPY_REASONS: ChoiceOption[] = [
   { id: "phong_chieu", label: "Chất lượng phòng chiếu" },
@@ -26,6 +26,7 @@ export const HAPPY_REASONS: ChoiceOption[] = [
   { id: "khong_gian", label: "Không gian & cơ sở vật chất rạp" },
   { id: "dat_ve", label: "Đặt vé & giao dịch nhanh chóng" },
   { id: "khuyen_mai", label: "Chương trình khuyến mãi & ưu đãi" },
+  { id: "khac", label: "Lý do khác" },
 ];
 
 // ---------- BRANCH 2: UNHAPPY (rating <= 3) ----------

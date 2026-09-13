@@ -111,30 +111,16 @@ export default function FeedbackPage() {
     }, 220);
   }
 
-  // ---------- NHÁNH HÀI LÒNG: CHỌN LÝ DO ----------
+  // ---------- NHÁNH HÀI LÒNG: CHỌN 1 LÝ DO DUY NHẤT (AUTO-ADVANCE) ----------
   function toggleHappyReason(id: string) {
     clearTimer();
-    setHappyReasons((prev) => {
-      const isSelected = prev.includes(id);
-      let updated: string[];
-      if (isSelected) {
-        updated = prev.filter((r) => r !== id);
-      } else {
-        if (prev.length < HAPPY_MAX_SELECT) {
-          updated = [...prev, id];
-        } else {
-          updated = prev;
-        }
-      }
-
-      // Nếu đã chọn đủ tối đa 2 lý do, tự động chuyển sang câu tiếp sau 320ms
-      if (!isSelected && updated.length === HAPPY_MAX_SELECT) {
-        autoAdvanceTimer.current = setTimeout(() => {
-          setStep("happyFeedback");
-        }, 320);
-      }
-      return updated;
-    });
+    setHappyReasons([id]);
+    // Nếu chọn option thông thường: tự động chuyển bước sau 220ms
+    if (id !== "khac") {
+      autoAdvanceTimer.current = setTimeout(() => {
+        setStep("happyFeedback");
+      }, 220);
+    }
   }
 
   function proceedAfterHappyReasons() {
@@ -345,7 +331,7 @@ export default function FeedbackPage() {
         step={2}
         totalSteps={totalSteps}
         onBack={() => setStep("rating")}
-        eyebrow={`Chọn tối đa ${HAPPY_MAX_SELECT} điều bạn hài lòng nhất`}
+        eyebrow="Chạm vào điều bạn hài lòng nhất (hệ thống sẽ tự chuyển tiếp)"
         question={HAPPY_QUESTION}
         footer={
           <div className="flex items-center justify-between gap-3">
@@ -371,7 +357,7 @@ export default function FeedbackPage() {
           options={HAPPY_REASONS}
           selected={happyReasons}
           onToggle={toggleHappyReason}
-          maxSelect={HAPPY_MAX_SELECT}
+          maxSelect={1}
           otherText={happyOtherText}
           onOtherTextChange={setHappyOtherText}
           otherPlaceholder="Ghi rõ lý do khác khiến bạn hài lòng..."
