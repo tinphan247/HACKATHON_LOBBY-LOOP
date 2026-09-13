@@ -1,25 +1,47 @@
 import { DashboardAlert } from "../lib/types";
 
-export default function AlertBanner({ alert }: { alert: DashboardAlert }) {
+interface Props {
+  alert: DashboardAlert;
+  isLight?: boolean;
+}
+
+export default function AlertBanner({ alert, isLight = false }: Props) {
   return (
-    <div className="flex items-start gap-4 rounded-2xl border border-rose-500/40 bg-rose-950/30 p-5 backdrop-blur-sm">
-      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-rose-400 font-bold text-base">
-        !
-      </div>
-      <div>
+    <div
+      className={`rounded-2xl p-5 border transition ${
+        isLight
+          ? "bg-rose-50/90 border-rose-300 text-slate-900 shadow-sm"
+          : "bg-rose-950/30 border-rose-500/40 text-white backdrop-blur-sm"
+      }`}
+    >
+      <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <span className="rounded bg-rose-500/20 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-rose-300">
-            Lobby Alert — Cảnh báo tức thì
+          <span
+            className={`px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider border ${
+              isLight
+                ? "bg-rose-600 text-white border-rose-700"
+                : "bg-rose-500/20 text-rose-300 border-rose-500/30"
+            }`}
+          >
+            CẢNH BÁO VẬN HÀNH
+          </span>
+          <span className={`text-xs ${isLight ? "text-slate-500" : "text-gray-400"}`}>
+            Phát hiện trong {alert.windowLabel}
           </span>
         </div>
-        <p className="mt-1.5 text-[15px] font-semibold text-white">
-          Vấn đề "{alert.issueLabel}" đang tăng bất thường trong ca trực
+
+        <p className={`text-sm sm:text-base font-bold ${isLight ? "text-rose-950" : "text-white"}`}>
+          Vấn đề "{alert.issueLabel}" đang tăng bất thường ({alert.count} lượt phản ánh)
         </p>
-        <p className="mt-1 text-sm text-gray-300">
-          Ghi nhận {alert.count} khách phản ánh trong {alert.windowLabel}
-        </p>
-        <div className="mt-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 px-3.5 py-2 text-xs sm:text-sm text-amber-200">
-          <strong>Đề xuất hành động:</strong> {alert.recommendation}
+
+        <div
+          className={`mt-1 rounded-xl p-3 text-xs sm:text-sm border ${
+            isLight
+              ? "bg-amber-50 border-amber-300 text-amber-950"
+              : "bg-amber-500/15 border-amber-500/30 text-amber-200"
+          }`}
+        >
+          <span className="font-bold">Đề xuất xử lý ngay:</span> {alert.recommendation}
         </div>
       </div>
     </div>

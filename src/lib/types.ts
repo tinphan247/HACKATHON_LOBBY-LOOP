@@ -12,8 +12,11 @@ export interface Feedback {
   rootCause?: string;
   /** Free-text used only for the "Khác" (Other) paths */
   comment?: string;
+  /** Yêu cầu hỗ trợ/khắc phục từ khách hàng (bắt buộc ở nhánh unhappy) */
+  actionWanted?: string;
   timestamp: string; // ISO string
   location?: string;
+  device?: string; // Model thiết bị (iPhone 15 Pro, Samsung S23,...)
   isDemo?: boolean;
 }
 

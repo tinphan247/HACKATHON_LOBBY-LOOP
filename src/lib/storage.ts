@@ -18,6 +18,8 @@ function toSupabaseRow(f: Feedback) {
     issue: f.issue || null,
     root_cause: f.rootCause || null,
     comment: f.comment || null,
+    action_wanted: f.actionWanted || null,
+    device: f.device || "Không xác định",
     timestamp: f.timestamp,
     location: f.location || "Lobby",
     is_demo: Boolean(f.isDemo),
@@ -33,6 +35,8 @@ function fromSupabaseRow(row: any): Feedback {
     issue: row.issue || undefined,
     rootCause: row.root_cause || undefined,
     comment: row.comment || undefined,
+    actionWanted: row.action_wanted || undefined,
+    device: row.device || undefined,
     timestamp: row.timestamp,
     location: row.location || undefined,
     isDemo: Boolean(row.is_demo),
@@ -44,15 +48,23 @@ function getLocalFeedback(): Feedback[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    // Tự động dọn dẹp các bản ghi demo cũ còn sót trong localStorage của trình duyệt
+    const cleaned = parsed.filter((f) => !f.isDemo);
+    if (cleaned.length !== parsed.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch {
     return [];
   }
 }
 
 function persistLocal(data: Feedback[]) {
-  memoryCache = data;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  // Loại bỏ hoàn toàn dữ liệu demo khỏi lưu trữ
+  const cleaned = data.filter((f) => !f.isDemo);
+  memoryCache = cleaned;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
   window.dispatchEvent(new CustomEvent(EVENT_NAME));
 }
 
@@ -65,7 +77,7 @@ export function isSupabaseActive(): boolean {
  */
 export function getAllFeedback(): Feedback[] {
   if (memoryCache !== null) {
-    return memoryCache;
+    return memoryCache.filter((f) => !f.isDemo);
   }
   const local = getLocalFeedback();
   memoryCache = local;
@@ -109,9 +121,37 @@ export async function addFeedback(feedback: Feedback): Promise<void> {
 
   if (isSupabaseActive() && supabase) {
     try {
-      const { error } = await supabase.from("feedbacks").insert(toSupabaseRow(feedback));
+      const fullRow = toSupabaseRow(feedback);
+      const { error } = await supabase.from("feedbacks").insert(fullRow);
       if (error) {
-        console.error("[LobbyLoop] Error pushing to Supabase:", error.message);
+        console.warn("[LobbyLoop] Insert with new columns warning:", error.message);
+        // Fallback: Nếu DB chưa chạy ALTER TABLE để tạo cột device/action_wanted, gửi các cột chuẩn cơ bản
+        if (error.message?.includes("column") || error.message?.includes("schema cache")) {
+          const fallbackRow = {
+            id: feedback.id,
+            rating: feedback.rating,
+            branch: feedback.branch,
+            satisfaction_reasons: feedback.satisfactionReasons || [],
+            issue: feedback.issue || null,
+            root_cause: feedback.rootCause || null,
+            comment: [
+              feedback.device ? `[Thiết bị: ${feedback.device}]` : "",
+              feedback.actionWanted ? `[Yêu cầu: ${feedback.actionWanted}]` : "",
+              feedback.comment || "",
+            ]
+              .filter(Boolean)
+              .join(" "),
+            timestamp: feedback.timestamp,
+            location: feedback.location || "Lobby",
+            is_demo: Boolean(feedback.isDemo),
+          };
+          const { error: fbErr } = await supabase.from("feedbacks").insert(fallbackRow);
+          if (fbErr) {
+            console.error("[LobbyLoop] Supabase fallback insert error:", fbErr.message);
+          } else {
+            console.log("[LobbyLoop] Supabase fallback insert successful (gộp vào comment)");
+          }
+        }
       }
     } catch (err) {
       console.error("[LobbyLoop] Supabase insert failed:", err);
@@ -170,19 +210,28 @@ export async function clearAllFeedback(): Promise<void> {
 }
 
 /**
- * Ensures there's always something to look at on first dashboard load.
+ * Clear only demo data
+ */
+export async function clearDemoData(): Promise<void> {
+  const current = getAllFeedback().filter((f) => !f.isDemo);
+  persistLocal(current);
+
+  if (isSupabaseActive() && supabase) {
+    try {
+      await supabase.from("feedbacks").delete().eq("is_demo", true);
+    } catch (err) {
+      console.error("[LobbyLoop] Supabase clear demo failed:", err);
+    }
+  }
+}
+
+/**
+ * Sync initial data on dashboard load. Does NOT force demo seeding if empty.
  */
 export async function ensureSeeded(): Promise<void> {
   if (isSupabaseActive() && supabase) {
-    const data = await syncWithSupabase();
-    if (data.length === 0) {
-      await resetToSampleData();
-    }
+    await syncWithSupabase();
     return;
-  }
-
-  if (getAllFeedback().length === 0) {
-    persistLocal(generateSampleData());
   }
 }
 
@@ -238,28 +287,47 @@ export function exportFeedbacksToCSV(feedbacks: Feedback[]): void {
     return;
   }
 
+  function formatTimeWithSeconds(iso: string): string {
+    try {
+      const d = new Date(iso);
+      const hours = String(d.getHours()).padStart(2, "0");
+      const mins = String(d.getMinutes()).padStart(2, "0");
+      const secs = String(d.getSeconds()).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${hours}:${mins}:${secs} ${day}/${month}/${year}`;
+    } catch {
+      return iso;
+    }
+  }
+
   const headers = [
     "Mã phản hồi",
-    "Thời gian",
+    "Thời gian (HH:mm:ss DD/MM/YYYY)",
+    "Thiết bị (Model)",
     "Điểm đánh giá (Sao)",
     "Phân loại",
     "Lý do hài lòng",
     "Vấn đề khiếu nại",
     "Nguyên nhân gốc (Root Cause)",
     "Ý kiến đóng góp",
+    "Yêu cầu hỗ trợ (Xử lý ngay)",
     "Địa điểm",
     "Dữ liệu Demo",
   ];
 
   const rows = feedbacks.map((f) => [
     `"${f.id}"`,
-    `"${f.timestamp}"`,
+    `"${formatTimeWithSeconds(f.timestamp)}"`,
+    `"${f.device || "Không xác định"}"`,
     f.rating,
     `"${f.branch === "happy" ? "Hài lòng (Happy)" : "Không hài lòng (Unhappy)"}"`,
     `"${(f.satisfactionReasons || []).join("; ")}"`,
     `"${f.issue || ""}"`,
     `"${f.rootCause || ""}"`,
     `"${(f.comment || "").replace(/"/g, '""')}"`,
+    `"${(f.actionWanted || "").replace(/"/g, '""')}"`,
     `"${f.location || "Lobby"}"`,
     f.isDemo ? "Có" : "Không",
   ]);

@@ -1,51 +1,109 @@
 import { Feedback } from "../lib/types";
 import { labelForIssue, labelForRootCause } from "../lib/questions";
 
-function formatTime(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+function formatTimeWithSeconds(iso: string): string {
+  try {
+    const d = new Date(iso);
+    const hours = String(d.getHours()).padStart(2, "0");
+    const mins = String(d.getMinutes()).padStart(2, "0");
+    const secs = String(d.getSeconds()).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${hours}:${mins}:${secs} - ${day}/${month}/${year}`;
+  } catch {
+    return iso;
+  }
 }
 
-export default function LiveFeedbackCard({ feedback }: { feedback: Feedback }) {
+interface Props {
+  feedback: Feedback;
+  isLight?: boolean;
+}
+
+export default function LiveFeedbackCard({ feedback, isLight = false }: Props) {
   const isHappy = feedback.branch === "happy";
+  const deviceName = feedback.device || "Không xác định";
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl bg-white/[0.04] border border-white/5 px-4 py-3 hover:bg-white/[0.07] transition">
-      <div className="flex items-center gap-3 min-w-0">
+    <div
+      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl p-3.5 transition border ${
+        isLight
+          ? "bg-white border-slate-200/80 hover:bg-slate-50/80 shadow-sm text-slate-800"
+          : "bg-white/[0.04] border-white/5 hover:bg-white/[0.07] text-gray-200"
+      }`}
+    >
+      <div className="flex items-start sm:items-center gap-3 min-w-0">
+        {/* Rating text badge */}
         <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-bold ${
+          className={`flex shrink-0 items-center justify-center px-2.5 py-1 rounded-lg text-xs font-bold border ${
             isHappy
-              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-              : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+              ? isLight
+                ? "bg-emerald-50 text-emerald-700 border-emerald-300"
+                : "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+              : isLight
+              ? "bg-rose-50 text-rose-700 border-rose-300"
+              : "bg-rose-500/15 text-rose-300 border-rose-500/30"
           }`}
         >
-          {feedback.rating}★
+          {feedback.rating} sao
         </span>
-        <div className="min-w-0 truncate">
+
+        {/* Device model tag */}
+        <span
+          className={`shrink-0 px-2 py-0.5 rounded text-[11px] font-mono border ${
+            isLight
+              ? "bg-slate-100 text-slate-700 border-slate-300"
+              : "bg-white/10 text-gray-300 border-white/10"
+          }`}
+        >
+          {deviceName}
+        </span>
+
+        {/* Content details */}
+        <div className="min-w-0 flex-1">
           {isHappy ? (
-            <p className="text-sm font-medium text-gray-200 truncate">
+            <p className="text-xs sm:text-sm font-medium truncate">
               {(feedback.satisfactionReasons ?? [])
                 .map((r) => labelForIssue(r))
                 .join(", ") || "Hài lòng dịch vụ"}
-            </p>
-          ) : (
-            <p className="text-sm font-medium text-gray-200 truncate">
-              <span className="text-rose-300 font-semibold">{labelForIssue(feedback.issue)}</span>
-              {feedback.rootCause && (
-                <span className="text-gray-400">
-                  {" "}→ {labelForRootCause(feedback.issue, feedback.rootCause)}
+              {feedback.comment && (
+                <span className={`italic ml-1 ${isLight ? "text-slate-500" : "text-gray-400"}`}>
+                  — "{feedback.comment}"
                 </span>
               )}
-              {feedback.comment && (
-                <span className="text-gray-400 italic"> — "{feedback.comment}"</span>
-              )}
             </p>
+          ) : (
+            <div className="text-xs sm:text-sm">
+              <span className={`font-semibold ${isLight ? "text-rose-600" : "text-rose-400"}`}>
+                {labelForIssue(feedback.issue)}
+              </span>
+              {feedback.rootCause && (
+                <span className={isLight ? "text-slate-600" : "text-gray-400"}>
+                  {" "}| {labelForRootCause(feedback.issue, feedback.rootCause)}
+                </span>
+              )}
+              {feedback.actionWanted && (
+                <p className={`mt-0.5 text-xs font-medium ${isLight ? "text-amber-700" : "text-amber-300"}`}>
+                  Yêu cầu xử lý: "{feedback.actionWanted}"
+                </p>
+              )}
+              {feedback.comment && !feedback.actionWanted && (
+                <p className={`mt-0.5 text-xs italic ${isLight ? "text-slate-500" : "text-gray-400"}`}>
+                  Chi tiết: "{feedback.comment}"
+                </p>
+              )}
+            </div>
           )}
         </div>
       </div>
-      <div className="shrink-0 text-right text-xs text-gray-400">
-        <p className="font-medium text-gray-300">{formatTime(feedback.timestamp)}</p>
-        <p className="text-[11px] text-gray-500">{feedback.location ?? "Lobby"}</p>
+
+      {/* Timestamp with seconds */}
+      <div className={`shrink-0 text-left sm:text-right text-xs ${isLight ? "text-slate-500" : "text-gray-400"}`}>
+        <p className={`font-mono font-medium ${isLight ? "text-slate-700" : "text-gray-300"}`}>
+          {formatTimeWithSeconds(feedback.timestamp)}
+        </p>
+        <p className="text-[11px] mt-0.5">{feedback.location ?? "Galaxy Cinema"}</p>
       </div>
     </div>
   );

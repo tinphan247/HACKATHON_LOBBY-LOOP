@@ -4,11 +4,11 @@ export interface ChoiceOption {
 }
 
 export const RATING_SCALE = [
-  { value: 1, emoji: "😡", label: "Rất không hài lòng" },
-  { value: 2, emoji: "😟", label: "Không hài lòng" },
-  { value: 3, emoji: "😐", label: "Bình thường" },
-  { value: 4, emoji: "😊", label: "Hài lòng" },
-  { value: 5, emoji: "🤩", label: "Rất hài lòng" },
+  { value: 1, label: "Rất không hài lòng" },
+  { value: 2, label: "Không hài lòng" },
+  { value: 3, label: "Bình thường" },
+  { value: 4, label: "Hài lòng" },
+  { value: 5, label: "Rất hài lòng" },
 ] as const;
 
 export const CSAT_QUESTION =

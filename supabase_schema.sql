@@ -13,11 +13,17 @@ CREATE TABLE IF NOT EXISTS public.feedbacks (
   issue TEXT,
   root_cause TEXT,
   comment TEXT,
+  action_wanted TEXT,
+  device TEXT DEFAULT 'Không xác định',
   timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   location TEXT DEFAULT 'Galaxy Nguyen Du',
   is_demo BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migration nếu bảng feedbacks đã tồn tại:
+ALTER TABLE public.feedbacks ADD COLUMN IF NOT EXISTS device TEXT DEFAULT 'Không xác định';
+ALTER TABLE public.feedbacks ADD COLUMN IF NOT EXISTS action_wanted TEXT;
 
 -- Index để tối ưu truy vấn theo thời gian và đánh giá
 CREATE INDEX IF NOT EXISTS idx_feedbacks_timestamp ON public.feedbacks (timestamp DESC);
