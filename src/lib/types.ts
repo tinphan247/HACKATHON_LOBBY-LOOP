@@ -17,6 +17,7 @@ export interface Feedback {
   timestamp: string; // ISO string
   location?: string;
   device?: string; // Model thiết bị (iPhone 15 Pro, Samsung S23,...)
+  ip?: string; // Địa chỉ IP công khai của khách hàng
   isDemo?: boolean;
 }
 

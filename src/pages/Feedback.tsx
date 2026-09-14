@@ -1,9 +1,10 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import OptionGrid from "../components/OptionGrid";
 import QuestionScreen from "../components/QuestionScreen";
 import RatingRow from "../components/RatingRow";
 import { addFeedback } from "../lib/storage";
-import { getDeviceModel } from "../lib/device";
+import { getAccurateDeviceModel, getDeviceModel } from "../lib/device";
+import { fetchClientIp, getCachedIp } from "../lib/ip";
 import {
   CSAT_QUESTION,
   HAPPY_MAX_SELECT,
@@ -50,6 +51,12 @@ export default function FeedbackPage() {
     return 4; // rating (1) -> issue (2) -> rootCause (3) -> actionWanted (4)
   }, [branch, issue]);
 
+  // Tự động kích hoạt lấy IP và phân giải chính xác model thiết bị ngay khi vào trang
+  useEffect(() => {
+    fetchClientIp();
+    getAccurateDeviceModel();
+  }, []);
+
   function clearTimer() {
     if (autoAdvanceTimer.current) {
       clearTimeout(autoAdvanceTimer.current);
@@ -57,9 +64,10 @@ export default function FeedbackPage() {
     }
   }
 
-  function submit(finalFeedback: Partial<Feedback>) {
+  async function submit(finalFeedback: Partial<Feedback>) {
     clearTimer();
-    const detectedDevice = getDeviceModel();
+    const detectedDevice = await getAccurateDeviceModel().catch(() => getDeviceModel());
+    const clientIp = await fetchClientIp().catch(() => getCachedIp());
 
     // Gộp lý do khác nếu có
     let combinedComment = finalFeedback.comment || "";
@@ -77,6 +85,7 @@ export default function FeedbackPage() {
       timestamp: new Date().toISOString(),
       location: "Lobby",
       device: detectedDevice,
+      ip: clientIp,
       comment: combinedComment || undefined,
       actionWanted: actionWanted.trim() || undefined,
       ...finalFeedback,

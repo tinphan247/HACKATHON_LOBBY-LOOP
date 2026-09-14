@@ -24,6 +24,7 @@ interface Props {
 export default function LiveFeedbackCard({ feedback, isLight = false }: Props) {
   const isHappy = feedback.branch === "happy";
   const deviceName = feedback.device || "Không xác định";
+  const clientIp = feedback.ip;
 
   return (
     <div
@@ -33,7 +34,7 @@ export default function LiveFeedbackCard({ feedback, isLight = false }: Props) {
           : "bg-white/[0.04] border-white/5 hover:bg-white/[0.07] text-gray-200"
       }`}
     >
-      <div className="flex items-start sm:items-center gap-3 min-w-0">
+      <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-wrap sm:flex-nowrap">
         {/* Rating text badge */}
         <span
           className={`flex shrink-0 items-center justify-center px-2.5 py-1 rounded-lg text-xs font-bold border ${
@@ -56,9 +57,24 @@ export default function LiveFeedbackCard({ feedback, isLight = false }: Props) {
               ? "bg-slate-100 text-slate-700 border-slate-300"
               : "bg-white/10 text-gray-300 border-white/10"
           }`}
+          title="Thiết bị khách hàng"
         >
           {deviceName}
         </span>
+
+        {/* IP Address tag */}
+        {clientIp && (
+          <span
+            className={`shrink-0 px-2 py-0.5 rounded text-[11px] font-mono border ${
+              isLight
+                ? "bg-blue-50 text-blue-700 border-blue-200"
+                : "bg-blue-500/15 text-blue-300 border-blue-500/30"
+            }`}
+            title="Địa chỉ IP khách hàng"
+          >
+            IP: {clientIp}
+          </span>
+        )}
 
         {/* Content details */}
         <div className="min-w-0 flex-1">

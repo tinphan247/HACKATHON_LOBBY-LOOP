@@ -81,11 +81,13 @@ export default function FeedbackTableModal({
       const comment = (f.comment || "").toLowerCase();
       const actionWanted = (f.actionWanted || "").toLowerCase();
       const device = (f.device || "").toLowerCase();
+      const ip = (f.ip || "").toLowerCase();
       const id = f.id.toLowerCase();
 
       return (
         id.includes(term) ||
         device.includes(term) ||
+        ip.includes(term) ||
         reasons.includes(term) ||
         issue.includes(term) ||
         rootCause.includes(term) ||
@@ -324,7 +326,7 @@ export default function FeedbackTableModal({
                     }`}
                   >
                     <th className="py-2.5 px-3">Thời gian (Giờ:Phút:Giây)</th>
-                    <th className="py-2.5 px-3">Thiết bị (Model)</th>
+                    <th className="py-2.5 px-3">Thiết bị / IP</th>
                     <th className="py-2.5 px-3">Đánh giá</th>
                     <th className="py-2.5 px-3">Chi tiết & Yêu cầu xử lý</th>
                     <th className="py-2.5 px-3">Ghi chú</th>
@@ -350,15 +352,29 @@ export default function FeedbackTableModal({
                           {formattedDate}
                         </td>
                         <td className="py-3 px-3 whitespace-nowrap">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[11px] font-mono border ${
-                              isLight
-                                ? "bg-slate-100 text-slate-800 border-slate-300"
-                                : "bg-white/10 text-gray-300 border-white/10"
-                            }`}
-                          >
-                            {f.device || "Không xác định"}
-                          </span>
+                          <div className="flex flex-col gap-1 items-start">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[11px] font-mono border ${
+                                isLight
+                                  ? "bg-slate-100 text-slate-800 border-slate-300"
+                                  : "bg-white/10 text-gray-300 border-white/10"
+                              }`}
+                            >
+                              {f.device || "Không xác định"}
+                            </span>
+                            {f.ip && (
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-[10px] font-mono border ${
+                                  isLight
+                                    ? "bg-blue-50 text-blue-700 border-blue-200"
+                                    : "bg-blue-500/15 text-blue-300 border-blue-500/30"
+                                }`}
+                                title="Địa chỉ IP khách hàng"
+                              >
+                                IP: {f.ip}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3 px-3 whitespace-nowrap">
                           <span

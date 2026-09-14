@@ -11,6 +11,33 @@ function minutesAgo(mins: number): string {
 
 const LOCATIONS = ["Lobby", "Quầy vé", "Phòng chiếu 3", "Khu F&B"];
 
+const SAMPLE_DEVICES = [
+  "iPhone 16 Pro Max",
+  "iPhone 15 Pro",
+  "iPhone 14 Pro / 15 / 16",
+  "iPhone 12 / 12 Pro / 13 / 13 Pro / 14",
+  "Samsung Galaxy S24 Ultra",
+  "Samsung Galaxy S23 Ultra",
+  "Samsung Galaxy Z Fold 5",
+  "Samsung Galaxy A54 5G",
+  "Xiaomi 14",
+  "OPPO (CPH2525)",
+  "iPad Air",
+  "Windows PC",
+];
+
+const SAMPLE_IPS = [
+  "113.161.45.102",
+  "14.169.28.75",
+  "118.69.182.204",
+  "171.244.11.89",
+  "42.112.90.15",
+  "27.72.105.62",
+  "125.235.210.44",
+  "1.53.190.12",
+  "115.79.33.158",
+];
+
 /**
  * Builds a believable spread of demo feedback: a mix of happy/neutral/
  * negative ratings, varied issues and root causes, spread across the
@@ -23,7 +50,13 @@ export function generateSampleData(): Feedback[] {
   let counter = 1;
 
   const push = (f: Omit<Feedback, "id" | "isDemo">) => {
-    items.push({ ...f, id: `FB${String(counter).padStart(3, "0")}`, isDemo: true });
+    items.push({
+      ...f,
+      id: `FB${String(counter).padStart(3, "0")}`,
+      device: f.device || randomItem(SAMPLE_DEVICES),
+      ip: f.ip || randomItem(SAMPLE_IPS),
+      isDemo: true,
+    });
     counter += 1;
   };
 
