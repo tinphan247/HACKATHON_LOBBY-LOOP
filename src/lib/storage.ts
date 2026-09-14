@@ -28,6 +28,42 @@ function toSupabaseRow(f: Feedback) {
 }
 
 function fromSupabaseRow(row: any): Feedback {
+  let comment: string | undefined = row.comment || undefined;
+  let device: string | undefined = row.device || undefined;
+  let ip: string | undefined = row.ip || undefined;
+  let actionWanted: string | undefined = row.action_wanted || undefined;
+
+  // Nếu comment chứa các tag fallback do DB chưa chạy ALTER TABLE, tự động bóc tách trả lại đúng trường
+  if (comment && typeof comment === "string") {
+    const devMatch = comment.match(/\[Thiết bị:\s*([^\]]+)\]/i);
+    if (devMatch) {
+      if (!device || device === "Không xác định") {
+        device = devMatch[1].trim();
+      }
+      comment = comment.replace(devMatch[0], "").trim();
+    }
+
+    const ipMatch = comment.match(/\[IP:\s*([^\]]+)\]/i);
+    if (ipMatch) {
+      if (!ip || ip === "Không xác định") {
+        ip = ipMatch[1].trim();
+      }
+      comment = comment.replace(ipMatch[0], "").trim();
+    }
+
+    const actionMatch = comment.match(/\[Yêu cầu:\s*([^\]]+)\]/i);
+    if (actionMatch) {
+      if (!actionWanted || !actionWanted.trim()) {
+        actionWanted = actionMatch[1].trim();
+      }
+      comment = comment.replace(actionMatch[0], "").trim();
+    }
+
+    if (!comment || !comment.trim()) {
+      comment = undefined;
+    }
+  }
+
   return {
     id: row.id,
     rating: row.rating,
@@ -35,10 +71,10 @@ function fromSupabaseRow(row: any): Feedback {
     satisfactionReasons: Array.isArray(row.satisfaction_reasons) ? row.satisfaction_reasons : [],
     issue: row.issue || undefined,
     rootCause: row.root_cause || undefined,
-    comment: row.comment || undefined,
-    actionWanted: row.action_wanted || undefined,
-    device: row.device || undefined,
-    ip: row.ip || undefined,
+    comment,
+    actionWanted,
+    device,
+    ip,
     timestamp: row.timestamp,
     location: row.location || undefined,
     isDemo: Boolean(row.is_demo),

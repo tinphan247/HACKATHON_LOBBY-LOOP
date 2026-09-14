@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import AlertBanner from "../components/AlertBanner";
 import InsightBarList from "../components/InsightBarList";
 import KpiCard from "../components/KpiCard";
@@ -25,6 +26,7 @@ import {
 import { Feedback } from "../lib/types";
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [data, setData] = useState<Feedback[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -192,7 +194,7 @@ export default function DashboardPage() {
 
           <button
             type="button"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => navigate("/feedback-management")}
             className={`px-3 py-1.5 rounded-xl border text-xs sm:text-sm font-semibold transition shadow-sm ${
               isLight
                 ? "bg-white border-slate-300 text-slate-800 hover:bg-slate-100"
@@ -384,7 +386,7 @@ export default function DashboardPage() {
               </span>
             </div>
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => navigate("/feedback-management")}
               className="text-xs text-orange-500 hover:text-orange-600 font-bold transition"
             >
               Xem chi tiết bảng dữ liệu →

@@ -3,6 +3,7 @@ import DashboardPage from "./pages/Dashboard";
 import FeedbackPage from "./pages/Feedback";
 import LandingPage from "./pages/Landing";
 import QRPage from "./pages/QR";
+import FeedbackManagementPage from "./pages/FeedbackManagement";
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
       <Route path="/feedback" element={<FeedbackPage />} />
       <Route path="/qr" element={<QRPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/feedback-management" element={<FeedbackManagementPage />} />
     </Routes>
   );
 }

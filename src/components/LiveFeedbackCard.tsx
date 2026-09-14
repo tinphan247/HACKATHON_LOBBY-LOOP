@@ -34,7 +34,7 @@ export default function LiveFeedbackCard({ feedback, isLight = false }: Props) {
           : "bg-white/[0.04] border-white/5 hover:bg-white/[0.07] text-gray-200"
       }`}
     >
-      <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-wrap sm:flex-nowrap">
+      <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-wrap sm:flex-nowrap flex-1 overflow-hidden">
         {/* Rating text badge */}
         <span
           className={`flex shrink-0 items-center justify-center px-2.5 py-1 rounded-lg text-xs font-bold border ${
@@ -77,14 +77,14 @@ export default function LiveFeedbackCard({ feedback, isLight = false }: Props) {
         )}
 
         {/* Content details */}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 overflow-hidden">
           {isHappy ? (
             <p className="text-xs sm:text-sm font-medium truncate">
               {(feedback.satisfactionReasons ?? [])
                 .map((r) => labelForIssue(r))
                 .join(", ") || "Hài lòng dịch vụ"}
               {feedback.comment && (
-                <span className={`italic ml-1 ${isLight ? "text-slate-500" : "text-gray-400"}`}>
+                <span className={`italic ml-1 break-words break-all ${isLight ? "text-slate-500" : "text-gray-400"}`}>
                   — "{feedback.comment}"
                 </span>
               )}
@@ -100,13 +100,13 @@ export default function LiveFeedbackCard({ feedback, isLight = false }: Props) {
                 </span>
               )}
               {feedback.actionWanted && (
-                <p className={`mt-0.5 text-xs font-medium ${isLight ? "text-amber-700" : "text-amber-300"}`}>
+                <p className={`mt-0.5 text-xs font-medium break-words break-all line-clamp-2 ${isLight ? "text-amber-700" : "text-amber-300"}`}>
                   Yêu cầu xử lý: "{feedback.actionWanted}"
                 </p>
               )}
-              {feedback.comment && !feedback.actionWanted && (
-                <p className={`mt-0.5 text-xs italic ${isLight ? "text-slate-500" : "text-gray-400"}`}>
-                  Chi tiết: "{feedback.comment}"
+              {feedback.comment && (
+                <p className={`mt-0.5 text-xs italic break-words break-all line-clamp-2 ${isLight ? "text-slate-500" : "text-gray-400"}`}>
+                  {feedback.actionWanted ? "Ghi chú: " : "Chi tiết: "}"{feedback.comment}"
                 </p>
               )}
             </div>

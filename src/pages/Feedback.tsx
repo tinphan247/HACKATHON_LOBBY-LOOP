@@ -409,8 +409,12 @@ export default function FeedbackPage() {
             onChange={(e) => setHappyComment(e.target.value)}
             placeholder="Chia sẻ thêm cảm nhận hoặc lời khen dành cho nhân viên phục vụ (nếu có)..."
             rows={4}
-            className="w-full resize-none rounded-2xl border border-gray-200 bg-[#F8FAFC] p-4 text-xs sm:text-sm text-gray-800 outline-none focus:border-[#00BCD4] focus:bg-white transition"
+            maxLength={500}
+            className="w-full resize-none rounded-2xl border border-gray-200 bg-[#F8FAFC] p-4 text-xs sm:text-sm text-gray-900 outline-none transition focus:border-[#00BCD4] focus:bg-white"
           />
+          <p className="text-[11px] text-gray-400 text-right">
+            {happyComment.length}/500 ký tự
+          </p>
           <p className="text-[11px] text-gray-400 text-right">
             Có thể để trống và bấm Hoàn tất
           </p>
@@ -544,6 +548,7 @@ export default function FeedbackPage() {
             }}
             placeholder="Ví dụ: Cần đổi ghế ngồi, nhờ nhân viên kiểm tra lại điều hòa, kiểm tra lại bắp nước..."
             rows={4}
+            maxLength={500}
             className={`w-full resize-none rounded-2xl border p-4 text-xs sm:text-sm text-gray-900 outline-none transition ${
               actionError
                 ? "border-rose-500 bg-rose-50/40"
@@ -557,7 +562,7 @@ export default function FeedbackPage() {
           )}
           {!actionError && (
             <p className="text-[11px] text-gray-500 text-right">
-              {actionWanted.trim().length}/3 ký tự tối thiểu
+              {actionWanted.trim().length}/500 ký tự (tối thiểu 3)
             </p>
           )}
         </div>
